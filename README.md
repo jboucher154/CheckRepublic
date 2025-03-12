@@ -1,2 +1,3 @@
-Check Republic 
- A better checklish app
+# Check Republic 
+
+A better checklist app
