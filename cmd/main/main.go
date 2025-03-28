@@ -18,5 +18,5 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	// start up server
-	http.ListenAndServe(":80", nil)
+	http.ListenAndServe(":8080", nil)
 }
