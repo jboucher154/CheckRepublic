@@ -18,7 +18,7 @@ jobs:
       packages: read
       statuses: write
 
-    steps: 
+    steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -26,7 +26,7 @@ jobs:
 
       - name: Super-linter
         uses: super-linter/super-linter@v7.3.0
-        env: 
+        env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SAVE_SUPER_LINTER_SUMMARY: true
