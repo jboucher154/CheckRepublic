@@ -9,13 +9,16 @@ import (
 
 func main() {
 	
+
+	// use multiplexer to match url patterns!
+
 	// adds a new handler
 	http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, "This should serve the root")
 	})
 	// can pass idectly to the listen and serve for root behavior, but can also add as a specific endpoint
 	// handler := http.HandlerFunc(api.ChecklistHandler)
-	http.HandleFunc("/checklist", api.ChecklistHandler)
+	http.HandleFunc("/checklist", api.GetChecklistHandler)
 	//****look into this more for static assests
 	// serve static files by setting up a file server directory
 	// fs := http.FileServer(http.Dir("static/"))
