@@ -1,7 +1,7 @@
 package main
 
 import (
-	"check_republic/internal/api"
+	// "check_republic/internal/api"
 	"fmt"
 	"log"
 	"net/http"
@@ -18,7 +18,7 @@ func main() {
 	})
 	// can pass idectly to the listen and serve for root behavior, but can also add as a specific endpoint
 	// handler := http.HandlerFunc(api.ChecklistHandler)
-	http.HandleFunc("/checklist", api.GetChecklistHandler)
+	// http.HandleFunc("/checklist", api.GetChecklistHandler)
 	//****look into this more for static assests
 	// serve static files by setting up a file server directory
 	// fs := http.FileServer(http.Dir("static/"))
