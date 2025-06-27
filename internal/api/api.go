@@ -2,7 +2,7 @@ package api
 
 import (
 	"check_republic/internal/database"
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"strconv"
 )
@@ -22,16 +22,26 @@ func (s *Server) GetChecklistHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid id", http.StatusBadRequest)
 		return
 	}
-	checklist, err := s.DB.GetChecklistByID(id)
+	checklist, items, err := s.DB.GetChecklistByID(id)
 	if err != nil {
 		http.Error(w, "id not found", http.StatusNotFound)
 		return
 	}
-	fmt.Fprintln(w, checklist)
+	response := ChecklistResponse{
+		ID: checklist.ID,
+		Name: checklist.Name,
+		Archived: checklist.Archived,
+		TemplateID: checklist.TemplateId,
+		Complete: checklist.Complete,
+		Created: checklist.Created,
+		Updated: checklist.Updated,
+		Items: items,
+		Children: nil,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
-// func (p *ChecklistServer) ChecklistHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) CreateChecklistHandler(w http.ResponseWriter, r *http.Request) {
 
-// 	checklist, _ := strconv.Atoi(r.PathValue("id"))
-// 	fmt.Fprint(w, p.store.GetChecklistByID(checklist))
-// }
+}
