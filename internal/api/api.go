@@ -28,20 +28,21 @@ func (s *Server) GetChecklistHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response := ChecklistResponse{
-		ID: checklist.ID,
-		Name: checklist.Name,
-		Archived: checklist.Archived,
+		ID:         checklist.ID,
+		Name:       checklist.Name,
+		Archived:   checklist.Archived,
 		TemplateID: checklist.TemplateId,
-		Complete: checklist.Complete,
-		Created: checklist.Created,
-		Updated: checklist.Updated,
-		Items: items,
-		Children: nil,
+		Complete:   checklist.Complete,
+		Created:    checklist.Created,
+		Updated:    checklist.Updated,
+		Items:      items,
+		Children:   nil,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
 func (s *Server) CreateChecklistHandler(w http.ResponseWriter, r *http.Request) {
-
+	// get body, validate that it is json for new checklist
+	// unmarshall json
 }
