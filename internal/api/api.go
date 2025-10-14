@@ -44,5 +44,20 @@ func (s *Server) GetChecklistHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) CreateChecklistHandler(w http.ResponseWriter, r *http.Request) {
 	// get body, validate that it is json for new checklist
+	var newChecklist NewChecklistRequest
 	// unmarshall json
+	if err := json.NewDecoder(r.Body).Decode(&newChecklist); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+	// create checklist
+	id, err := s.DB.CreateChecklist(newChecklist.Name)
+	if err != nil {
+		http.Error(w, "failed to create checklist", http.StatusInternalServerError)
+		return
+	}
+	// return id of new checklist
+	response := NewChecklistResponse{ID: id}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }

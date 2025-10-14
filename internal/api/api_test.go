@@ -136,28 +136,18 @@ func TestCreateChecklistHandler(t *testing.T) {
 
 		assertStatus(t, response.Code, http.StatusOK)
 		//
-		//how to call it? return the id of the created checklist?
-		//check contents of list
 		c_request, _ := http.NewRequest(http.MethodGet, "/checklist?id=3", nil)
 		c_response := httptest.NewRecorder()
 		// send request
 		server.GetChecklistHandler(c_response, c_request)
 		//check responses
 		assertStatus(t, c_response.Code, http.StatusOK)
-		var got ChecklistResponse
+		var got NewChecklistResponse
 		if err := json.NewDecoder(c_response.Body).Decode(&got);err != nil {
 			t.Fatalf("invalid JSON response: %v", err)
 		}
-		want := ChecklistResponse{
+		want := NewChecklistResponse{
 				ID:       3,
-				Name:     "New empty list",
-				Complete: false,
-				Archived: false,
-				TemplateID: 3,
-				Created: "now",
-				Updated: "now",
-				Items: []models.ChecklistItem{},
-				Children: nil,
 			}
 		if !reflect.DeepEqual(want, got) {
 			t.Errorf("response mismatch: got %+v, want %+v", got, want)

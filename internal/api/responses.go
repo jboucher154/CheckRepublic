@@ -18,3 +18,7 @@ type ChecklistResponse struct {
 type NewChecklistRequest struct {
 	Name	string	`json:"name"`
 }
+
+type NewChecklistResponse struct {
+	ID	int	`json:"id"`
+}
