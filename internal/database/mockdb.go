@@ -10,6 +10,7 @@ type MockDB struct {
 	Checklists      map[int]models.Checklist
 	Items           map[int]models.ChecklistItem
 	ChecklistToItem map[int][]int
+	NextID          int
 }
 
 func NewMockDB() *MockDB {
@@ -73,12 +74,12 @@ func NewMockDB() *MockDB {
 			},
 		},
 		ChecklistToItem: map[int][]int{
-			1:{101, 102, 103},
-			2:{2},
+			1: {101, 102, 103},
+			2: {2},
 		},
+		NextID: 3,
 	}
 }
-
 
 func (m *MockDB) GetChecklistByID(id int) (models.Checklist, []models.ChecklistItem, error) {
 	checklist, err := m.Checklists[id]
@@ -93,4 +94,27 @@ func (m *MockDB) GetChecklistByID(id int) (models.Checklist, []models.ChecklistI
 		}
 	}
 	return checklist, items, nil
+}
+
+func (m *MockDB) CreateChecklist(name string) (int, error) {
+	// title should be unique
+	for _, checklist := range m.Checklists {
+		if checklist.Name == name {
+			return 0, fmt.Errorf("checklist already exists")
+		}
+	}
+	// create new checklist with title
+	id := m.NextID
+	m.Checklists[id] = models.Checklist{
+		ID:         id,
+		Name:       name,
+		Complete:   false,
+		Archived:   false,
+		TemplateId: 0,
+		Created:    "now",
+		Updated:    "now",
+	}
+	m.NextID++
+	// return id of new checklist
+	return id, nil
 }

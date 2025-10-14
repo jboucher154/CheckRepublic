@@ -6,4 +6,5 @@ import (
 
 type DataStore interface {
 	GetChecklistByID(id int) (models.Checklist, []models.ChecklistItem, error)
+	CreateChecklist(name string) (int, error)
 }
