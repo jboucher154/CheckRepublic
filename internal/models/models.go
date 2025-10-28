@@ -8,12 +8,13 @@ type Checklist struct {
 	TemplateId	int		`json:"template_id"`
 	Created		string	`json:"created"`
 	Updated		string	`json:"updated"`
+	IsChild		bool	`json:"is_child"`
 }
 
 type ChecklistItem  struct {
 	ID			int		`json:"id"`
 	Title		string 	`json:"title"`
-	Description	string 	`json:"descritpion"`
+	Description	string 	`json:"description"`
 	Complete	bool	`json:"complete"`
 	ChecklistId	int		`json:"checklist_id"`
 	Created		string	`json:"created"`

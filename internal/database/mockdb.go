@@ -13,6 +13,10 @@ type MockDB struct {
 	NextID          int
 }
 
+func NewEmptyMockDB() *MockDB {
+	return &MockDB{}
+}
+
 func NewMockDB() *MockDB {
 	return &MockDB{
 		Checklists: map[int]models.Checklist{
@@ -24,6 +28,7 @@ func NewMockDB() *MockDB {
 				TemplateId: 1,
 				Created:    "now",
 				Updated:    "now",
+				IsChild:    false,
 			},
 			2: {
 				ID:         2,
@@ -33,6 +38,17 @@ func NewMockDB() *MockDB {
 				TemplateId: 2,
 				Created:    "now",
 				Updated:    "now",
+				IsChild:    false,
+			},
+			3: {
+				ID:         3,
+				Name:       "I'm a child",
+				Complete:   false,
+				Archived:   false,
+				TemplateId: 3,
+				Created:    "now",
+				Updated:    "now",
+				IsChild:    true,
 			},
 		},
 		Items: map[int]models.ChecklistItem{
@@ -113,8 +129,22 @@ func (m *MockDB) CreateChecklist(name string) (int, error) {
 		TemplateId: 0,
 		Created:    "now",
 		Updated:    "now",
+		IsChild:    false,
 	}
 	m.NextID++
 	// return id of new checklist
 	return id, nil
+}
+
+// returns Checklist info only
+// need to not return checklists that are children...
+func (m *MockDB) GetChecklists(userID string) ([]models.Checklist, error) {
+	var checklists []models.Checklist
+
+	for _, checklist := range m.Checklists {
+		if !checklist.IsChild {
+			checklists = append(checklists, checklist)
+		}
+	}
+	return checklists, nil
 }
