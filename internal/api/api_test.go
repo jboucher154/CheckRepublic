@@ -170,7 +170,7 @@ func TestGetChecklistsHandler(t *testing.T) {
 		//check responses
 		got := response.Body.String()
 		want := "no checklists found for user\n"
-		
+
 		assertStatus(t, response.Code, http.StatusNotFound)
 		assertResponseString(t, got, want)
 	})
@@ -197,6 +197,70 @@ func TestCreateChecklistHandler(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		server.CreateChecklistHandler(response, request)
+		assertStatus(t, response.Code, http.StatusOK)
+		var checklist_res NewChecklistResponse
+		err = json.NewDecoder(response.Body).Decode(&checklist_res)
+		if err != nil {
+			t.Fatalf("failed to decode response: %v", err)
+		}
+		id := checklist_res.ID
+		path := fmt.Sprintf("/checklist?id=%d", id)
+		//request the id to check that exists in db
+		c_request, _ := http.NewRequest(http.MethodGet, path, nil)
+		c_response := httptest.NewRecorder()
+		// send request
+		server.GetChecklistHandler(c_response, c_request)
+		//check responses
+		assertStatus(t, c_response.Code, http.StatusOK)
+
+		// check that the name is the same as the one in the request
+		var got ChecklistResponse
+		if err := json.NewDecoder(c_response.Body).Decode(&got); err != nil {
+			t.Fatalf("invalid JSON response: %v", err)
+		}
+		want := ChecklistResponse{
+			ID:         3,
+			Name:       "New empty list",
+			Complete:   false,
+			Archived:   false,
+			TemplateID: 0,
+			Created:    "now",
+			Updated:    "now",
+			Items:      []models.ChecklistItem{},
+			Children:   nil,
+			IsChild:    false,
+		}
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("response mismatch: got %+v, want %+v", got, want)
+		}
+	})
+
+}
+
+// TODO make get for checklist items so can test the create better
+
+//TODO In progress making test for new checklist item creation
+func TestCreateChecklistItemHandler(t *testing.T) {
+
+	mock := database.NewMockDB()
+	server := &Server{DB: mock}
+
+	newItem := NewItemRequest{
+		ChecklistID: 1,
+		Title:       "new item",
+		Description: "just a new one",
+	}
+	t.Run("create new item for checklist id 1", func(t *testing.T) {
+		//prepare body
+		bodyBytes, err := json.Marshal(newItem)
+		if err != nil {
+			t.Fatalf("failed to marshal request: %v", err)
+		}
+		request, _ := http.NewRequest(http.MethodPost, "/checklist_item", bytes.NewReader(bodyBytes))
+		request.Header.Set("Content-Type", "application/json")
+		response := httptest.NewRecorder()
+
+		server.CreateItemHandler(response, request)
 		assertStatus(t, response.Code, http.StatusOK)
 		var checklist_res NewChecklistResponse
 		err = json.NewDecoder(response.Body).Decode(&checklist_res)

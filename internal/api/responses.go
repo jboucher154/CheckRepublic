@@ -17,15 +17,25 @@ type ChecklistResponse struct {
 	Items		[]models.ChecklistItem	`json:"items"`
 	Children	[]ChecklistResponse		`json:"children"`
 }
+type NewChecklistRequest struct {
+	Name	string	`json:"name"`
+}
 
 type ListChecklistsResponse struct {
 	Checklists	[]models.Checklist	`json:"checklists"`
 }
 
-type NewChecklistRequest struct {
-	Name	string	`json:"name"`
-}
 
 type NewChecklistResponse struct {
+	ID	int	`json:"id"`
+}
+
+type NewItemRequest struct {
+	ChecklistID	int		`json:"checklist_id"`
+	Title		string	`json:"title"`
+	Description	string	`json:"description"`
+}
+
+type NewItemResponse struct {
 	ID	int	`json:"id"`
 }

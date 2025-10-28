@@ -11,6 +11,7 @@ type MockDB struct {
 	Items           map[int]models.ChecklistItem
 	ChecklistToItem map[int][]int
 	NextID          int
+	NextItemID		int
 }
 
 func NewEmptyMockDB() *MockDB {
@@ -94,6 +95,7 @@ func NewMockDB() *MockDB {
 			2: {2},
 		},
 		NextID: 3,
+		NextItemID: 104,
 	}
 }
 
@@ -110,6 +112,19 @@ func (m *MockDB) GetChecklistByID(id int) (models.Checklist, []models.ChecklistI
 		}
 	}
 	return checklist, items, nil
+}
+
+// returns Checklist info only
+// need to not return checklists that are children...
+func (m *MockDB) GetChecklists(userID string) ([]models.Checklist, error) {
+	var checklists []models.Checklist
+
+	for _, checklist := range m.Checklists {
+		if !checklist.IsChild {
+			checklists = append(checklists, checklist)
+		}
+	}
+	return checklists, nil
 }
 
 func (m *MockDB) CreateChecklist(name string) (int, error) {
@@ -136,15 +151,18 @@ func (m *MockDB) CreateChecklist(name string) (int, error) {
 	return id, nil
 }
 
-// returns Checklist info only
-// need to not return checklists that are children...
-func (m *MockDB) GetChecklists(userID string) ([]models.Checklist, error) {
-	var checklists []models.Checklist
-
-	for _, checklist := range m.Checklists {
-		if !checklist.IsChild {
-			checklists = append(checklists, checklist)
-		}
+func (m *MockDB) CreateChecklistItem(checklistId int, title string, description string) (int, error) {
+	itemID := m.NextItemID
+	
+	newItem := models.ChecklistItem{
+		ID: itemID,
+		Title: title,
+		Description: description,
+		Complete: false,
+		Created: "now",
+		Updated: "now",
 	}
-	return checklists, nil
+	m.Items[itemID] = newItem
+	m.NextItemID++
+	return itemID, nil
 }

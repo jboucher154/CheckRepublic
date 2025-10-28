@@ -39,7 +39,7 @@ func (s *Server) GetChecklistHandler(w http.ResponseWriter, r *http.Request) {
 		Updated:    checklist.Updated,
 		Items:      items,
 		Children:   nil,
-		IsChild: 	checklist.IsChild,
+		IsChild:    checklist.IsChild,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
@@ -74,11 +74,32 @@ func (s *Server) CreateChecklistHandler(w http.ResponseWriter, r *http.Request) 
 	// create checklist
 	id, err := s.DB.CreateChecklist(newChecklist.Name)
 	if err != nil {
+		//should this be error 409 if specifically for dup name?
 		http.Error(w, "failed to create checklist", http.StatusInternalServerError)
 		return
 	}
 	// return id of new checklist
 	response := NewChecklistResponse{ID: id}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+//TODO make get checklist items for checklist id
+
+func (s *Server) CreateItemHandler(w http.ResponseWriter, r *http.Request) {
+	var newItem NewItemRequest
+
+	err := json.NewDecoder(r.Body).Decode(&newItem)
+	if err != nil {
+		http.Error(w, "incorrect body format for new item creation", http.StatusNotAcceptable)
+		return
+	}
+	id, err := s.DB.CreateChecklistItem(newItem.ChecklistID, newItem.Title, newItem.Description)
+	if err != nil {
+		http.Error(w, "failed to create checklist item", http.StatusInternalServerError)
+		return
+	}
+	response := NewItemResponse{ID: id}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
