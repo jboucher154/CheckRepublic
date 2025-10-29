@@ -39,3 +39,7 @@ type NewItemRequest struct {
 type NewItemResponse struct {
 	ID	int	`json:"id"`
 }
+
+type GetItemsResponse struct {
+	Items		[]models.ChecklistItem	`json:"items"`
+}

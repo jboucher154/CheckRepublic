@@ -262,18 +262,18 @@ func TestCreateChecklistItemHandler(t *testing.T) {
 
 		server.CreateItemHandler(response, request)
 		assertStatus(t, response.Code, http.StatusOK)
-		var checklist_res NewChecklistResponse
-		err = json.NewDecoder(response.Body).Decode(&checklist_res)
+		var item_res NewItemResponse
+		err = json.NewDecoder(response.Body).Decode(&item_res)
 		if err != nil {
 			t.Fatalf("failed to decode response: %v", err)
 		}
-		id := checklist_res.ID
-		path := fmt.Sprintf("/checklist?id=%d", id)
+		id := item_res.ID
+		path := fmt.Sprintf("/checklist-items?id=%d", id)
 		//request the id to check that exists in db
 		c_request, _ := http.NewRequest(http.MethodGet, path, nil)
 		c_response := httptest.NewRecorder()
 		// send request
-		server.GetChecklistHandler(c_response, c_request)
+		server.GetItemsHandler(c_response, c_request)//need this handler
 		//check responses
 		assertStatus(t, c_response.Code, http.StatusOK)
 

@@ -161,8 +161,26 @@ func (m *MockDB) CreateChecklistItem(checklistId int, title string, description 
 		Complete: false,
 		Created: "now",
 		Updated: "now",
+		ChecklistId: checklistId,
 	}
 	m.Items[itemID] = newItem
 	m.NextItemID++
+	m.ChecklistToItem[checklistId] = append(m.ChecklistToItem[checklistId], itemID)
 	return itemID, nil
+}
+
+//TODO add getting child checklists as well (not items, just basic checklist info that can be expanded later)
+func (m *MockDB) GetChecklistItems(checklistID int) ([]models.ChecklistItem, error) {
+	var items []models.ChecklistItem
+	itemIds, ok := m.ChecklistToItem[checklistID]
+	
+	if !ok || len(itemIds) == 0 {
+		return items, ErrNotFound
+	}
+	//this is assuming all are items, not checklist children
+	for _, itemId := range itemIds {
+		items = append(items, m.Items[itemId])
+	}
+	
+	return items, nil
 }

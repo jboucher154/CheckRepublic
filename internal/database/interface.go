@@ -7,7 +7,7 @@ import (
 type DataStore interface {
 	GetChecklistByID(id int) (models.Checklist, []models.ChecklistItem, error)
 	GetChecklists(userID string) ([]models.Checklist, error)
-	// GetChecklistItems(checklistID int) ([]models.ChecklistItem, error)
+	GetChecklistItems(checklistID int) ([]models.ChecklistItem, error)
 	// GetChecklistTitles(userID string) ([]string, error)
 
 	CreateChecklist(name string) (int, error)

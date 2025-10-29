@@ -4,6 +4,7 @@ import (
 	"check_republic/internal/database"
 	"check_republic/internal/models"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 )
@@ -63,6 +64,33 @@ func (s *Server) GetChecklistsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(checklistsWrapper) //should this have an error check?
 
 }
+
+func (s *Server) GetItemsHandler(w http.ResponseWriter, r *http.Request) {
+	//returns all items for a given checklist id
+	idStr := r.URL.Query().Get("id") //lookup how this works
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		if idStr == "" {
+			http.Error(w, "missing id", http.StatusBadRequest)
+			return
+		}
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+	items, err := s.DB.GetChecklistItems(id)
+	if err != nil {
+		if errors.Is(err, database.ErrNotFound) {
+			http.Error(w, "no items found for checklist", http.StatusNotFound)
+		return
+		}
+		http.Error(w, "unable to retrieve items for checklist", http.StatusInternalServerError)
+		return
+	}
+	response := GetItemsResponse{Items: items}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 func (s *Server) CreateChecklistHandler(w http.ResponseWriter, r *http.Request) {
 	// get body, validate that it is json for new checklist
 	var newChecklist NewChecklistRequest
