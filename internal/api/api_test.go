@@ -69,7 +69,7 @@ func TestGetChecklistHandler(t *testing.T) {
 			Created:    "now",
 			Updated:    "now",
 			Items: []models.ChecklistItem{
-				{ID: 2, Title: "Mosturize", Description: "apply lotion", Complete: false, ChecklistId: 2, Created: "now", Updated: "now"},
+				{ID: 2, Title: "Moisturize", Description: "apply lotion", Complete: false, ChecklistId: 2, Created: "now", Updated: "now"},
 			},
 			Children: nil,
 			IsChild:  false,
@@ -234,72 +234,117 @@ func TestCreateChecklistHandler(t *testing.T) {
 			t.Errorf("response mismatch: got %+v, want %+v", got, want)
 		}
 	})
-
 }
 
 // TODO make get for checklist items so can test the create better
-
-//TODO In progress making test for new checklist item creation
-func TestCreateChecklistItemHandler(t *testing.T) {
-
+func TestGetItemsHandler(t *testing.T) {
 	mock := database.NewMockDB()
 	server := &Server{DB: mock}
-
-	newItem := NewItemRequest{
-		ChecklistID: 1,
-		Title:       "new item",
-		Description: "just a new one",
-	}
-	t.Run("create new item for checklist id 1", func(t *testing.T) {
+	t.Run("get items from list id 2", func(t *testing.T) {
 		//prepare body
-		bodyBytes, err := json.Marshal(newItem)
-		if err != nil {
-			t.Fatalf("failed to marshal request: %v", err)
-		}
-		request, _ := http.NewRequest(http.MethodPost, "/checklist_item", bytes.NewReader(bodyBytes))
-		request.Header.Set("Content-Type", "application/json")
+		request, _ := http.NewRequest(http.MethodGet, "/checklist-items?id=2", nil)
 		response := httptest.NewRecorder()
 
-		server.CreateItemHandler(response, request)
+		server.GetItemsHandler(response, request)
 		assertStatus(t, response.Code, http.StatusOK)
-		var item_res NewItemResponse
-		err = json.NewDecoder(response.Body).Decode(&item_res)
+		var got GetItemsResponse
+		err := json.NewDecoder(response.Body).Decode(&got)
 		if err != nil {
 			t.Fatalf("failed to decode response: %v", err)
 		}
-		id := item_res.ID
-		path := fmt.Sprintf("/checklist-items?id=%d", id)
-		//request the id to check that exists in db
-		c_request, _ := http.NewRequest(http.MethodGet, path, nil)
-		c_response := httptest.NewRecorder()
-		// send request
-		server.GetItemsHandler(c_response, c_request)//need this handler
-		//check responses
-		assertStatus(t, c_response.Code, http.StatusOK)
-
 		// check that the name is the same as the one in the request
-		var got ChecklistResponse
-		if err := json.NewDecoder(c_response.Body).Decode(&got); err != nil {
-			t.Fatalf("invalid JSON response: %v", err)
-		}
-		want := ChecklistResponse{
-			ID:         3,
-			Name:       "New empty list",
-			Complete:   false,
-			Archived:   false,
-			TemplateID: 0,
-			Created:    "now",
-			Updated:    "now",
-			Items:      []models.ChecklistItem{},
-			Children:   nil,
-			IsChild:    false,
+
+		want := GetItemsResponse{
+			Items: []models.ChecklistItem{
+				{
+					ID:          2,
+					Title:       "Moisturize",
+					Description: "apply lotion",
+					Complete:    false,
+					ChecklistId: 2,
+					Created:     "now",
+					Updated:     "now",
+				},
+			},
 		}
 		if !reflect.DeepEqual(want, got) {
 			t.Errorf("response mismatch: got %+v, want %+v", got, want)
 		}
 	})
+	t.Run("Test request for items when there are none", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/checklist-items?id=3", nil)
+		response := httptest.NewRecorder()
 
+		server.GetItemsHandler(response, request)
+		assertStatus(t, response.Code, http.StatusNotFound)
+		want := "no items found for checklist\n"
+		got := response.Body.String()
+		assertResponseString(t, got, want)
+	})
+	
 }
+
+//TODO In progress making test for new checklist item creation
+// func TestCreateChecklistItemHandler(t *testing.T) {
+
+// 	mock := database.NewMockDB()
+// 	server := &Server{DB: mock}
+
+// 	newItem := NewItemRequest{
+// 		ChecklistID: 1,
+// 		Title:       "new item",
+// 		Description: "just a new one",
+// 	}
+// 	t.Run("create new item for checklist id 1", func(t *testing.T) {
+// 		//prepare body
+// 		bodyBytes, err := json.Marshal(newItem)
+// 		if err != nil {
+// 			t.Fatalf("failed to marshal request: %v", err)
+// 		}
+// 		request, _ := http.NewRequest(http.MethodPost, "/checklist_item", bytes.NewReader(bodyBytes))
+// 		request.Header.Set("Content-Type", "application/json")
+// 		response := httptest.NewRecorder()
+
+// 		server.CreateItemHandler(response, request)
+// 		assertStatus(t, response.Code, http.StatusOK)
+// 		var item_res NewItemResponse
+// 		err = json.NewDecoder(response.Body).Decode(&item_res)
+// 		if err != nil {
+// 			t.Fatalf("failed to decode response: %v", err)
+// 		}
+// 		id := item_res.ID
+// 		path := fmt.Sprintf("/checklist-items?id=%d", id)
+// 		//request the id to check that exists in db
+// 		c_request, _ := http.NewRequest(http.MethodGet, path, nil)
+// 		c_response := httptest.NewRecorder()
+// 		// send request
+// 		server.GetItemsHandler(c_response, c_request)//need this handler
+// 		//check responses
+// 		assertStatus(t, c_response.Code, http.StatusOK)
+
+// 		// check that the name is the same as the one in the request
+// 		var got ChecklistResponse
+// 		if err := json.NewDecoder(c_response.Body).Decode(&got); err != nil {
+// 			t.Fatalf("invalid JSON response: %v", err)
+// 		}
+// 		want := ChecklistResponse{
+// 			ID:         3,
+// 			Name:       "New empty list",
+// 			Complete:   false,
+// 			Archived:   false,
+// 			TemplateID: 0,
+// 			Created:    "now",
+// 			Updated:    "now",
+// 			Items:      []models.ChecklistItem{},
+// 			Children:   nil,
+// 			IsChild:    false,
+// 		}
+// 		if !reflect.DeepEqual(want, got) {
+// 			t.Errorf("response mismatch: got %+v, want %+v", got, want)
+// 		}
+// 	})
+
+// }
 
 /*   HELPER FUNCTIONS   */
 

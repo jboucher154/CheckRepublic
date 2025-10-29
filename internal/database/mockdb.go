@@ -11,7 +11,7 @@ type MockDB struct {
 	Items           map[int]models.ChecklistItem
 	ChecklistToItem map[int][]int
 	NextID          int
-	NextItemID		int
+	NextItemID      int
 }
 
 func NewEmptyMockDB() *MockDB {
@@ -82,7 +82,7 @@ func NewMockDB() *MockDB {
 			},
 			2: {
 				ID:          2,
-				Title:       "Mosturize",
+				Title:       "Moisturize",
 				Description: "apply lotion",
 				Complete:    false,
 				ChecklistId: 2,
@@ -94,7 +94,7 @@ func NewMockDB() *MockDB {
 			1: {101, 102, 103},
 			2: {2},
 		},
-		NextID: 3,
+		NextID:     3,
 		NextItemID: 104,
 	}
 }
@@ -153,14 +153,14 @@ func (m *MockDB) CreateChecklist(name string) (int, error) {
 
 func (m *MockDB) CreateChecklistItem(checklistId int, title string, description string) (int, error) {
 	itemID := m.NextItemID
-	
+
 	newItem := models.ChecklistItem{
-		ID: itemID,
-		Title: title,
+		ID:          itemID,
+		Title:       title,
 		Description: description,
-		Complete: false,
-		Created: "now",
-		Updated: "now",
+		Complete:    false,
+		Created:     "now",
+		Updated:     "now",
 		ChecklistId: checklistId,
 	}
 	m.Items[itemID] = newItem
@@ -169,11 +169,11 @@ func (m *MockDB) CreateChecklistItem(checklistId int, title string, description 
 	return itemID, nil
 }
 
-//TODO add getting child checklists as well (not items, just basic checklist info that can be expanded later)
+// TODO add getting child checklists as well (not items, just basic checklist info that can be expanded later)
 func (m *MockDB) GetChecklistItems(checklistID int) ([]models.ChecklistItem, error) {
 	var items []models.ChecklistItem
 	itemIds, ok := m.ChecklistToItem[checklistID]
-	
+
 	if !ok || len(itemIds) == 0 {
 		return items, ErrNotFound
 	}
@@ -181,6 +181,6 @@ func (m *MockDB) GetChecklistItems(checklistID int) ([]models.ChecklistItem, err
 	for _, itemId := range itemIds {
 		items = append(items, m.Items[itemId])
 	}
-	
+
 	return items, nil
 }

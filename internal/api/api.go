@@ -81,7 +81,7 @@ func (s *Server) GetItemsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, database.ErrNotFound) {
 			http.Error(w, "no items found for checklist", http.StatusNotFound)
-		return
+			return
 		}
 		http.Error(w, "unable to retrieve items for checklist", http.StatusInternalServerError)
 		return
