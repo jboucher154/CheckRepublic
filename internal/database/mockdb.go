@@ -184,3 +184,32 @@ func (m *MockDB) GetChecklistItems(checklistID int) ([]models.ChecklistItem, err
 
 	return items, nil
 }
+
+func (m *MockDB) UpdateChecklistItem(id int, updateInfo map[string]string) (models.ChecklistItem, error) {
+	//get item
+	itemToUpdate, ok := m.Items[id]
+	if !ok {
+		return itemToUpdate, ErrNotFound
+	}
+	//update fields passed
+	for key, value := range updateInfo {
+		switch key {
+			case "Title":
+				itemToUpdate.Title = value
+			case "Description":
+				itemToUpdate.Description = value
+			case "Complete":
+				//toggle
+				if updateInfo["Complete"] == "true" {
+					itemToUpdate.Complete = true
+				} else {
+					itemToUpdate.Complete = false
+				}
+			default:
+				return itemToUpdate, ErrIncorrectRequest
+		}
+	}
+	//send copy of updated item
+	m.Items[id] = itemToUpdate
+	return itemToUpdate, nil
+}

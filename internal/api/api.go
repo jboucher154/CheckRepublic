@@ -112,8 +112,6 @@ func (s *Server) CreateChecklistHandler(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(response)
 }
 
-//TODO make get checklist items for checklist id
-
 func (s *Server) CreateItemHandler(w http.ResponseWriter, r *http.Request) {
 	var newItem NewItemRequest
 
@@ -128,6 +126,42 @@ func (s *Server) CreateItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response := NewItemResponse{ID: id}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s *Server) UpdateItemHandler(w http.ResponseWriter, r *http.Request) {
+	var updateInfo	UpdateItemRequest
+	updateInfoMap := make(map[string]string)
+
+	err := json.NewDecoder(r.Body).Decode(&updateInfo)
+	if err != nil {
+		http.Error(w, "unable to decode json provided", http.StatusInternalServerError)
+		return
+	}
+	if updateInfo.Id == nil {
+		http.Error(w, "item ID not provided", http.StatusBadRequest)
+		return
+	}
+	if updateInfo.Title != nil {
+		updateInfoMap["Title"] = *updateInfo.Title
+	}
+	if updateInfo.Description != nil {
+		updateInfoMap["Description"] = *updateInfo.Description
+	}
+	if updateInfo.Complete != nil {
+		if *updateInfo.Complete {
+			updateInfoMap["Complete"] = "true"
+		} else {
+			updateInfoMap["Complete"] = "false"
+		}
+	}
+	updatedItem, err := s.DB.UpdateChecklistItem(*(updateInfo.Id), updateInfoMap)
+	if err != nil {
+		http.Error(w, "unable to update item", http.StatusInternalServerError) //might be another as well
+		return
+	}
+	response := UpdateItemResponse{Item: updatedItem}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }

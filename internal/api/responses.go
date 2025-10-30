@@ -43,3 +43,14 @@ type NewItemResponse struct {
 type GetItemsResponse struct {
 	Items		[]models.ChecklistItem	`json:"items"`
 }
+
+type UpdateItemRequest struct {
+	Id			*int		`json:"id"`
+	Title		*string 	`json:"title,omitempty"`
+	Description	*string 	`json:"description,omitempty"`
+	Complete	*bool		`json:"complete,omitempty"`
+}
+
+type UpdateItemResponse struct {
+	Item		models.ChecklistItem	`json:"item_updated"`
+}
