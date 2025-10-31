@@ -354,10 +354,10 @@ func TestUpdateItemHandler(t *testing.T) {
 	id := 2
 
 	itemUpdates := UpdateItemRequest{
-		Id: &id,
-		Title:      &title,
+		Id:          &id,
+		Title:       &title,
 		Description: &description,
-		Complete:	&complete,
+		Complete:    &complete,
 	}
 	t.Run("update item for checklist", func(t *testing.T) {
 		//prepare body
@@ -379,13 +379,13 @@ func TestUpdateItemHandler(t *testing.T) {
 		}
 		want := UpdateItemResponse{
 			Item: models.ChecklistItem{
-				ID: 2,
-				Title: title,
+				ID:          2,
+				Title:       title,
 				Description: description,
-				Complete: complete,
+				Complete:    complete,
 				ChecklistId: 2,
-				Created: "now",
-				Updated: "now",
+				Created:     "now",
+				Updated:     "now",
 			},
 		}
 		if !reflect.DeepEqual(want, got) {
@@ -405,9 +405,91 @@ func TestUpdateItemHandler(t *testing.T) {
 			t.Fatalf("invalid JSON response: %v", err)
 		}
 		c_want := GetItemsResponse{
-			Items: []models.ChecklistItem{want.Item,},
+			Items: []models.ChecklistItem{want.Item},
 		}
-		
+
+		if !reflect.DeepEqual(c_want, c_got) {
+			t.Errorf("response mismatch: got %+v, want %+v", got, want)
+		}
+	})
+
+}
+
+func TestUpdateChecklistHandler(t *testing.T) {
+
+	mock := database.NewMockDB()
+	server := &Server{DB: mock}
+
+	title := "updated"
+	isChild := false
+	complete := true
+	id := 3
+
+	checklistUpdates := UpdateChecklistRequest{
+		Id:       &id,
+		Name:     &title,
+		IsChild:  &isChild,
+		Complete: &complete,
+	}
+	t.Run("update checklist", func(t *testing.T) {
+		//prepare body
+		bodyBytes, err := json.Marshal(checklistUpdates)
+		if err != nil {
+			t.Fatalf("failed to marshal request: %v", err)
+		}
+		request, _ := http.NewRequest(http.MethodPatch, "/checklist", bytes.NewReader(bodyBytes))
+		request.Header.Set("Content-Type", "application/json")
+		response := httptest.NewRecorder()
+
+		server.UpdateChecklistHandler(response, request)
+		assertStatus(t, response.Code, http.StatusOK)
+
+		var got UpdateChecklistResponse
+		err = json.NewDecoder(response.Body).Decode(&got)
+		if err != nil {
+			t.Fatalf("failed to decode response: %v", err)
+		}
+		want := UpdateChecklistResponse{
+			Checklist: models.Checklist{
+				ID:         3,
+				Name:       "updated",
+				Complete:   true,
+				Archived:   false,
+				TemplateId: 3,
+				Created:    "now",
+				Updated:    "now",
+				IsChild:    false,
+			},
+		}
+		if !reflect.DeepEqual(want, got) {
+			t.Errorf("response mismatch: got %+v, want %+v", got, want)
+		}
+
+		// retrieve same and compare as well
+		c_request, _ := http.NewRequest(http.MethodGet, "/checklist?id=3", nil)
+		c_response := httptest.NewRecorder()
+		// send request
+		server.GetChecklistHandler(c_response, c_request) //need this handler
+		// //check responses
+		assertStatus(t, c_response.Code, http.StatusOK)
+
+		var c_got ChecklistResponse
+		if err := json.NewDecoder(c_response.Body).Decode(&c_got); err != nil {
+			t.Fatalf("invalid JSON response: %v", err)
+		}
+		c_want := ChecklistResponse{
+			ID:       3,
+			Name:     "updated",
+			Complete: true,
+			Archived: false,
+			TemplateID: 3,
+			Created:  "now",
+			Updated:  "now",
+			IsChild:  false,
+			Items:    []models.ChecklistItem{},
+			Children: nil,
+		}
+
 		if !reflect.DeepEqual(c_want, c_got) {
 			t.Errorf("response mismatch: got %+v, want %+v", got, want)
 		}

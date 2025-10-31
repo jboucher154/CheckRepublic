@@ -29,6 +29,10 @@ func (s *Server) GetChecklistHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "id not found", http.StatusNotFound)
 		return
 	}
+	// its := items
+	// if len(its) == 0 {
+	// 	its = nil
+	// }
 	//how to add child
 	response := ChecklistResponse{
 		ID:         checklist.ID,
@@ -131,7 +135,7 @@ func (s *Server) CreateItemHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) UpdateItemHandler(w http.ResponseWriter, r *http.Request) {
-	var updateInfo	UpdateItemRequest
+	var updateInfo UpdateItemRequest
 	updateInfoMap := make(map[string]string)
 
 	err := json.NewDecoder(r.Body).Decode(&updateInfo)
@@ -162,6 +166,56 @@ func (s *Server) UpdateItemHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response := UpdateItemResponse{Item: updatedItem}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (s *Server) UpdateChecklistHandler(w http.ResponseWriter, r *http.Request) {
+	//decode the body
+	var updateInfo UpdateChecklistRequest
+	updateInfoMap := make(map[string]string)
+	
+	err := json.NewDecoder(r.Body).Decode(&updateInfo)
+	if err != nil {
+		http.Error(w, "unable to decode json provided", http.StatusInternalServerError)
+		return
+	}
+	if updateInfo.Id == nil {
+		http.Error(w, "item ID not provided", http.StatusBadRequest)
+		return
+	}
+	if updateInfo.Name != nil {
+		updateInfoMap["Name"] = *updateInfo.Name
+	}
+	if updateInfo.IsChild != nil {
+		if *updateInfo.IsChild {
+			updateInfoMap["IsChild"] = "true"
+			} else {
+				updateInfoMap["IsChild"] = "false"
+			}
+		}
+		if updateInfo.Archived != nil {
+			if *updateInfo.Archived {
+				updateInfoMap["Archived"] = "true"
+				} else {
+					updateInfoMap["Archived"] = "false"
+				}
+			}
+			if updateInfo.Complete != nil {
+				if *updateInfo.Complete {
+					updateInfoMap["Complete"] = "true"
+					} else {
+						updateInfoMap["Complete"] = "false"
+					}
+				}
+	//send to update in db
+	updatedChecklist, err := s.DB.UpdateChecklist(*(updateInfo.Id), updateInfoMap)
+	if err != nil {
+		http.Error(w, "unable to update checklist", http.StatusInternalServerError) //might be another as well
+		return
+	}
+	//return copy of updated checklist info
+	response := UpdateChecklistResponse{Checklist: updatedChecklist}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }

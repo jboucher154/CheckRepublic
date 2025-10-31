@@ -213,3 +213,41 @@ func (m *MockDB) UpdateChecklistItem(id int, updateInfo map[string]string) (mode
 	m.Items[id] = itemToUpdate
 	return itemToUpdate, nil
 }
+
+func (m *MockDB) UpdateChecklist(id int, updateInfo map[string]string) (models.Checklist, error) {
+	//get item
+	checklistToUpdate, ok := m.Checklists[id] //would doing by reference be better
+	if !ok {
+		return checklistToUpdate, ErrNotFound
+	}
+	//update fields passed
+	for key, value := range updateInfo {
+		switch key {
+			case "Name":
+				checklistToUpdate.Name = value
+			case "IsChild":
+				if updateInfo["IsChild"] == "true" {
+					checklistToUpdate.IsChild = true
+				} else {
+					checklistToUpdate.IsChild = false
+				}
+			case "Complete":
+				if updateInfo["Complete"] == "true" {
+					checklistToUpdate.Complete = true
+				} else {
+					checklistToUpdate.Complete = false
+				}
+			case "Archived":
+				if updateInfo["Archived"] == "true" {
+					checklistToUpdate.Archived = true
+				} else {
+					checklistToUpdate.Archived = false
+				}
+			default:
+				return checklistToUpdate, ErrIncorrectRequest
+		}
+	}
+	//send copy of updated item
+	m.Checklists[id] = checklistToUpdate
+	return checklistToUpdate, nil
+}

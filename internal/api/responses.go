@@ -54,3 +54,16 @@ type UpdateItemRequest struct {
 type UpdateItemResponse struct {
 	Item		models.ChecklistItem	`json:"item_updated"`
 }
+
+type UpdateChecklistRequest struct {
+	Id			*int		`json:"id"`
+	Name		*string 	`json:"name,omitempty"`
+	IsChild		*bool 		`json:"description,omitempty"`
+	Complete	*bool		`json:"complete,omitempty"`
+	Archived	*bool		`json:"archived,omitempty"`
+}
+
+type UpdateChecklistResponse struct {
+	//what to send with this? min req to update to the new stuff?
+	Checklist		models.Checklist	`json:"checklist_updated"`
+}
