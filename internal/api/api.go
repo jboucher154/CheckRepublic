@@ -29,11 +29,7 @@ func (s *Server) GetChecklistHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "id not found", http.StatusNotFound)
 		return
 	}
-	// its := items
-	// if len(its) == 0 {
-	// 	its = nil
-	// }
-	//how to add child
+	
 	response := ChecklistResponse{
 		ID:         checklist.ID,
 		Name:       checklist.Name,
