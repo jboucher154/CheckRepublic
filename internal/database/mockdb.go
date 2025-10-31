@@ -251,3 +251,42 @@ func (m *MockDB) UpdateChecklist(id int, updateInfo map[string]string) (models.C
 	m.Checklists[id] = checklistToUpdate
 	return checklistToUpdate, nil
 }
+
+func (m *MockDB) DeleteChecklistItem(id int) error {
+	item, ok := m.Items[id]
+	if !ok {
+		return ErrNotFound
+	}
+	//remove item
+	delete(m.Items, id)
+	//remove id from mapping
+	itemIds := m.ChecklistToItem[item.ID]
+	var newIdList []int
+
+	for _, idInt := range itemIds {
+		if idInt != id {
+			newIdList = append(newIdList, idInt)
+		}
+	}
+	m.ChecklistToItem[item.ID] = newIdList
+	return nil
+}
+//not sure about the delete all children. maybe that sould always happen...
+func (m *MockDB) DeleteChecklist(id int) error {
+	_, ok := m.Checklists[id]
+	if !ok {
+		return ErrNotFound
+	}
+	//remove all items
+	items := m.ChecklistToItem[id]
+	for _, itemId := range items {
+		delete(m.Items, itemId)
+	}
+	//TODO remove children
+
+	// remove from item mapping list
+	delete(m.ChecklistToItem, id)
+	//delete checklist
+	delete(m.Checklists, id)
+	return nil
+}

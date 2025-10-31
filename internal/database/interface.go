@@ -17,6 +17,6 @@ type DataStore interface {
 	UpdateChecklist(id int, updateInfo map[string]string) (models.Checklist, error)
 	UpdateChecklistItem(id int, updateInfo map[string]string) (models.ChecklistItem, error)
 
-	// DeleteChecklist(id int, deleteAllChildren bool) error
-	// DeleteChecklistItem(id int) error
+	DeleteChecklist(id int) error
+	DeleteChecklistItem(id int) error
 }

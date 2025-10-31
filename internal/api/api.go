@@ -3,6 +3,7 @@ package api
 import (
 	"check_republic/internal/database"
 	"check_republic/internal/models"
+	// "check_republic/internal/server"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -214,4 +215,40 @@ func (s *Server) UpdateChecklistHandler(w http.ResponseWriter, r *http.Request) 
 	response := UpdateChecklistResponse{Checklist: updatedChecklist}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func (s *Server) DeleteItemHandler(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get("id") //lookup how this works
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		if idStr == "" {
+			http.Error(w, "missing id", http.StatusBadRequest)
+			return
+		}
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+	er := s.DB.DeleteChecklistItem(id)
+	if er != nil {
+		http.Error(w, "item not found", http.StatusNotFound)
+		return
+	}
+}
+
+func (s *Server) DeleteChecklistHandler(w http.ResponseWriter, r *http.Request) {
+	idStr := r.URL.Query().Get("id") //TODO lookup how this works
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		if idStr == "" {
+			http.Error(w, "missing id", http.StatusBadRequest)
+			return
+		}
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+	er := s.DB.DeleteChecklist(id)
+	if er != nil {
+		http.Error(w, "Checklist not found", http.StatusNotFound)
+		return
+	}
 }

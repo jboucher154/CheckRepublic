@@ -497,6 +497,52 @@ func TestUpdateChecklistHandler(t *testing.T) {
 
 }
 
+func TestDeleteItemHandler(t *testing.T) {
+	mock := database.NewMockDB()
+	server := &Server{DB: mock}
+	t.Run("delete item", func(t *testing.T){
+		request, _ := http.NewRequest(http.MethodPatch, "/checklist-item?id=2", nil)
+		response := httptest.NewRecorder()
+
+		server.DeleteItemHandler(response, request)
+
+		assertStatus(t, http.StatusOK, response.Code)
+
+		//request the list of items for checklist 2, should be empty now
+		c_request, _ := http.NewRequest(http.MethodGet, "/checklist-items?id=2", nil)
+		c_response := httptest.NewRecorder()
+		// send request
+		server.GetItemsHandler(c_response, c_request)
+		// //check responses
+		assertStatus(t, c_response.Code, http.StatusNotFound)
+	})
+}
+
+func TestDeleteChecklistHandler(t *testing.T) {
+	mock := database.NewMockDB()
+	server := &Server{DB: mock}
+	t.Run("delete checklist", func(t *testing.T){
+		request, _ := http.NewRequest(http.MethodPatch, "/checklist?id=3", nil)
+		response := httptest.NewRecorder()
+
+		server.DeleteChecklistHandler(response, request)
+
+		assertStatus(t, http.StatusOK, response.Code)
+
+		//request the list of items for checklist 2, should be empty now
+		c_request, _ := http.NewRequest(http.MethodGet, "/checklist?id=3", nil)
+		c_response := httptest.NewRecorder()
+		// send request
+		server.GetChecklistHandler(c_response, c_request)
+		// //check responses
+		assertStatus(t, c_response.Code, http.StatusNotFound)
+	})
+}
+
+// t.Run("delete item", func(t *testing.T){
+		
+// })
+
 /*   HELPER FUNCTIONS   */
 
 func assertStatus(t testing.TB, got, want int) {
